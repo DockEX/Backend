@@ -1,1 +1,1 @@
-## Repository for DockSpace' IaaS logic.
+## Repository for DockSpace' Infrastructure logic.
