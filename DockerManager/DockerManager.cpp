@@ -20,8 +20,15 @@ std::string execCommand(const std::string& cmd) {
 bool DockerManager::createContainer(const std::string& image, const std::string& containerName, 
                                     const std::string& mountPath, int hostPort, int containerPort) {
     std::string cmd = "docker run -d --name " + containerName + 
-                      " -p " + std::to_string(hostPort) + ":" + std::to_string(containerPort) +
-                      " -v " + mountPath + ":/app " + image;
+                      " -p " + std::to_string(hostPort) + ":" + std::to_string(containerPort);
+
+    // Only add volume mount if a non-empty path is provided
+    if (!mountPath.empty() && mountPath != "/") {
+        cmd += " -v " + mountPath + ":/app";
+    }
+
+    cmd += " " + image;
+
     int result = system(cmd.c_str());
     return (result == 0);
 }

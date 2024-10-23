@@ -126,7 +126,11 @@ int main() {
         // Ask for mount path
         std::cout << "Enter the mount path (leave empty for no volume mounting): ";
         std::string mountPath;
-        std::getline(std::cin, mountPath); // Consume newline left-over
+        std::getline(std::cin, mountPath);
+
+        // Trim whitespace
+        mountPath.erase(0, mountPath.find_first_not_of(" \t"));
+        mountPath.erase(mountPath.find_last_not_of(" \t") + 1);
 
         try {
             // Create the container
