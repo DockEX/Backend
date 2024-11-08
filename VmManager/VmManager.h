@@ -7,8 +7,8 @@
 class VMManager {
 public:
     VMManager() = default;
-
-    bool createVM(const std::string& vmName, const std::string& diskImage, const std::string& memorySize, int hostPort, int guestPort);
+    
+    bool createVM(const std::string& vmName, const std::string& repoContents);
     bool startVM(const std::string& vmName);
     bool stopVM(const std::string& vmName);
     std::vector<std::string> listVMs();
