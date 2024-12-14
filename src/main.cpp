@@ -1,38 +1,47 @@
 // VM Based Infrastructure
 
-#include <iostream>
-#include <string>
-#include <vector>
+#include "crow_all.h"
 #include "VmManager.h"
 
 int main() {
-    std::cout << "Welcome to the VM Manager!" << std::endl;
-    
-    while (true) {
-        std::cout << "\n1. Create VM" << std::endl;
-        std::cout << "2. List VMs" << std::endl;
-        std::cout << "3. Exit" << std::endl;
-        
-        int choice;
-        std::cout << "Enter your choice: ";
-        std::cin >> choice;
+    crow::SimpleApp app;
 
-        switch (choice) {
-            case 1:
-                VMManager::createVM();
-                break;
-            case 2:
-                VMManager::listVMs();
-                break;
-            case 3:
-                std::cout << "Exiting..." << std::endl;
-                return 0;
-            default:
-                std::cout << "Invalid choice. Please try again." << std::endl;
+    CROW_ROUTE(app,"/")
+    ([](){
+        return crow::response(200,"C++ Server up and running!");
+    });
+
+    CROW_ROUTE(app, "/createvm")
+    .methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+        auto body = crow::json::load(req.body);
+        if (!body) {
+            return crow::response(400, "Invalid JSON payload");
         }
-    }
 
-    return 0;
+        std::string userName = body["userName"].s();
+        std::string repoName = body["repoName"].s();
+        std::string vmName = userName + repoName;
+
+        VMManager::createVM(vmName);
+        return crow::response(200, "VM Created Successfully");
+    });
+
+    CROW_ROUTE(app, "/list-vms")
+    ([]() {
+        std::ostringstream output;
+        output << "List of VMs:\n";
+        std::string command = "sudo virsh list --all";
+        FILE* stream = popen(command.c_str(), "r");
+        char buffer[256];
+        while (fgets(buffer, sizeof(buffer), stream) != nullptr) {
+            output << buffer;
+        }
+        pclose(stream);
+
+        return crow::response(200, output.str());
+    });
+
+    app.port(8080).multithreaded().run();
 }
 
 

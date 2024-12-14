@@ -5,30 +5,32 @@
 
 using namespace std;
 
-void VMManager::createVM() {
-    string vmName = getVMName();
+void VMManager::createVM(const std::string& vmName) {
+    cout << "Creating VM: " << vmName << endl;
 
-    // Correctly formatted virt-install script with line continuation
+    // Construct the virt-install script
     string scriptContent = 
         "#!/bin/bash\n"
         "sudo virt-install --name=" + vmName + " \\\n"
-        "--memory=2048 \\\n"
+        "--memory=1024 \\\n"
         "--vcpus=1 \\\n"
-        "--disk size=5,bus=virtio,device=disk,format=qcow2,sparse=true \\\n"
+        "--disk size=3,bus=virtio,device=disk,format=qcow2,sparse=true \\\n"
         "--os-variant ubuntu20.04 \\\n"
         "--graphics spice,listen=127.0.0.1 \\\n"
         "--noautoconsole \\\n"
         "--location /var/lib/libvirt/images/ubuntu-20.04.3-desktop-amd64.iso";
 
-    // Write the script to a file
+    // Write script to a file
     ofstream scriptFile("/tmp/create_vm.sh");
     scriptFile << scriptContent;
     scriptFile.close();
 
-    // Make the script executable and execute it
-    system("chmod +x /tmp/create_vm.sh && /tmp/create_vm.sh");
+    // Execute the script
+    int retCode = system("chmod +x /tmp/create_vm.sh && /tmp/create_vm.sh");
+    if (retCode != 0) {
+        cerr << "Error executing VM creation script" << endl;
+    }
 }
-
 
 void VMManager::listVMs() {
     string command = "sudo virsh list --all";

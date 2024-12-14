@@ -6,7 +6,7 @@
 
 class VMManager {
 public:
-    static void createVM();
+    static void createVM(const std::string& vmName);
     static void listVMs();
 
 private:
