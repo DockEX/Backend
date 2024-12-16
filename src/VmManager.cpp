@@ -7,57 +7,56 @@
 
 using namespace std;
 
-string VMManager::createVM(const std::string& vmName) {
-    cout << "Creating VM: " << vmName << endl;
+std::string VMManager::createVM(const std::string& vmName, int ram, int vcpus, int diskSize) {
+    std::cout << "Creating VM: " << vmName << " with RAM: " << ram
+              << " MB, vCPUs: " << vcpus << ", Disk Size: " << diskSize << " GB" << std::endl;
 
     int retCode = system("chmod +x /tmp/fetch_public_key.sh && /tmp/fetch_public_key.sh");
     if (retCode != 0) {
-        cerr << "Error fetching public key from host" << endl;
+        std::cerr << "Error fetching public key from host" << std::endl;
         return "";
     }
 
-    string scriptContent =
+    std::string scriptContent =
         "#!/bin/bash\n"
         "sudo virt-install --name=" + vmName + " \\\n"
-        "--memory=2048 \\\n"
-        "--vcpus=1 \\\n"
-        "--disk size=4,bus=virtio,device=disk,format=qcow2,sparse=true \\\n"
+        "--memory=" + std::to_string(ram) + " \\\n"
+        "--vcpus=" + std::to_string(vcpus) + " \\\n"
+        "--disk size=" + std::to_string(diskSize) +
+        ",bus=virtio,device=disk,format=qcow2,sparse=true \\\n"
         "--os-variant ubuntu20.04 \\\n"
         "--graphics spice,listen=127.0.0.1 \\\n"
         "--noautoconsole \\\n"
         "--location /var/lib/libvirt/images/ubuntu-20.04.6-desktop-amd64.iso\n";
 
-    ofstream scriptFile("/tmp/create_vm.sh");
+    std::ofstream scriptFile("/tmp/create_vm.sh");
     scriptFile << scriptContent;
     scriptFile.close();
 
     retCode = system("chmod +x /tmp/create_vm.sh && /tmp/create_vm.sh");
     if (retCode != 0) {
-        cerr << "Error executing VM creation script" << endl;
+        std::cerr << "Error executing VM creation script" << std::endl;
         return "";
     }
 
-    cout << "Waiting for the VM to boot and acquire an IP address..." << endl;
+    std::cout << "Waiting for the VM to boot and acquire an IP address..." << std::endl;
 
-    string vmIP;
+    std::string vmIP;
     int maxRetries = 20; 
     int retryInterval = 5;  
 
     for (int i = 0; i < maxRetries; ++i) {
         vmIP = getVMIPAddress(vmName);
         if (!vmIP.empty()) {
-            cout << "VM " << vmName << " created successfully with IP: " << vmIP << endl;
-
-            // transferAndExecuteSSHSetupScript(vmIP);
-            
+            std::cout << "VM " << vmName << " created successfully with IP: " << vmIP << std::endl;
             return vmIP;
         }
 
-        cout << "Retrying to fetch IP address (" << i + 1 << "/" << maxRetries << ")..." << endl;
+        std::cout << "Retrying to fetch IP address (" << i + 1 << "/" << maxRetries << ")..." << std::endl;
         std::this_thread::sleep_for(std::chrono::seconds(retryInterval));
     }
 
-    cerr << "Failed to retrieve the IP address of the VM after multiple retries" << endl;
+    std::cerr << "Failed to retrieve the IP address of the VM after multiple retries" << std::endl;
     return "";
 }
 

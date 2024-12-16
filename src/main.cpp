@@ -22,16 +22,17 @@ int main() {
         std::string repoName = body["repoName"].s();
         std::string vmName = userName + repoName;
 
-        std::string vmIP = VMManager::createVM(vmName);
+        int ram = body["ram"].i();       // Dynamic RAM in MB
+        int vcpus = body["vcpus"].i();  // Dynamic vCPUs
+        int diskSize = body["diskSize"].i(); // Disk size in GB
+
+        std::string vmIP = VMManager::createVM(vmName, ram, vcpus, diskSize);
         if (vmIP.empty()) {
             return crow::response(500, "Failed to create VM or retrieve IP");
         }
-        // Return the VM IP in the response JSON
-        // crow::json::wvalue response;
-        // response["vmIP"] = vmIP;  // Include the vmIP in the response
+
         return crow::response(vmIP); // Returning the response with the IP
     });
-
 
     CROW_ROUTE(app, "/list-vms")
     ([]() {

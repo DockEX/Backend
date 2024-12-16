@@ -8,7 +8,7 @@
 
 class VMManager {
 public:
-    static std::string createVM(const std::string& vmName);
+    static std::string createVM(const std::string& vmName, int ram, int vcpus, int diskSize);
     static void listVMs();
     // static std::string createVMWithUpdates(const std::string& vmName, crow::response& res);
 
