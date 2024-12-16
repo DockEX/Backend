@@ -3,11 +3,14 @@
 
 #include <string>
 #include <vector>
+#include "crow_all.h"  
+
 
 class VMManager {
 public:
     static std::string createVM(const std::string& vmName);
     static void listVMs();
+    // static std::string createVMWithUpdates(const std::string& vmName, crow::response& res);
 
 private:
     static std::string getVMName();
